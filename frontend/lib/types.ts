@@ -1,72 +1,147 @@
+// src/lib/types.ts
+
+// =======================
+// === CORE API & PAGINATION TYPES ===
+// =======================
 
 /**
- * Tipe generik untuk respons API yang mengandung data dengan paginasi.
- * @template T - Tipe dari item data yang ada di dalam array `data`.
+ * A generic type for paginated API responses.
+ * @template T - The type of the data items in the `data` array.
  */
 export interface PaginatedApiResponse<T> {
   data: T[];
   meta: {
     total: number;
+    currentPage: number;
+    totalPages: number;
+    perPage: number;
   };
 }
 
 
-export type Company = {
-  id: number;
-  name: string;
-  logoUrl: string;
-  tagline: string;
-  location: string;
-  activeJobsCount: number;
-};
+// =======================
+// === COMPANY & JOB TYPES ===
+// =======================
 
-export interface ICompany {
-  id: number;
+/**
+ * ✅ UNIFIED Company Type. This is the single source of truth for a company.
+ * It combines all necessary fields from the previous duplicate definitions.
+ */
+export interface Company {
+  id: number | string;
   name: string;
   logoUrl?: string;
-  location: string;
   tagline?: string;
-  description?: string;
+  location: string;
   industry?: string;
   website?: string;
-  activeJobsCount?: number;
-  jobs?: IJob[]; // An array of associated jobs
+  description?: string;
+  activeJobsCount: number;
+  jobs?: Job[]; // An array of associated jobs for detail views
 }
 
-export interface IJob {
-  id: number;
+/**
+ * ✅ UNIFIED Job Type. This is the single source of truth for a job.
+ * It merges fields from IJob and Job into a single, comprehensive interface.
+ */
+export interface Job {
+  id: number | string;
   title: string;
   description: string;
   location: string;
   salary?: number;
   type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship';
   category: string;
-  company?: ICompany; // A job can be associated with a company
+  company?: Company; // A job can be associated with a Company
   requirements?: string[];
-  postedAt?: string; // ISO 8601 date string
+  postedAt: string; // ISO 8601 date string
 }
 
 /**
- * Struktur data mentah dari API untuk post blog (menggunakan snake_case).
+ * ✅ UNIFIED Application Type.
+ * Defines the structure for a job application.
  */
-export interface BlogPostAPI {
-  id: number | string;
-  slug: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  category: string;
-  tags: string[];
-  image_url: string;
-  author_name: string;
-  author_avatar_url?: string;
-  published_at: string; // ISO 8601 string
+export interface Application {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  companyName: string;
+  appliedAt: string; // ISO 8601 date string
+  status: 'Pending' | 'Reviewed' | 'Interview' | 'Offered' | 'Rejected';
 }
 
 /**
- * Struktur data post blog setelah diubah untuk digunakan di UI (camelCase).
+ * Data structure for the job application form.
  */
-export interface TransformedBlogPost {
+export interface ApplicationFormData {
+  coverLetter?: string;
+  resumeUrl?: string; 
+}
+
+/**
+ * Parameters for filtering job searches.
+ */
+export interface JobFilterParams {
+  query?: string;
+  location?: string;
+  type?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+}
+
+
+// =======================
+// === USER & PROFILE TYPES ===
+// =======================
+
+/**
+ * Data structure for a user's profile.
+ */
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber?: string;
+  location?: string;
+  headline?: string;
+  summary?: string;
+  cvUrl?: string;
+}
+
+export interface Experience {
+  id: string;
+  role: string;
+  company: string;
+  startDate: string; // ISO 8601 date string
+  endDate?: string;  // ISO 8601 date string or null for current
+  description: string;
+}
+
+export interface Education {
+  id: string;
+  institution: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string; // ISO 8601 date string
+  endDate?: string;  // ISO 8601 date string
+}
+
+export interface Skill {
+  id: string | number;
+  name: string;
+}
+
+
+// =======================
+// === BLOG TYPES ===
+// =======================
+
+/**
+ * Data structure for a blog post after transformation for the UI.
+ * Uses camelCase for consistency.
+ */
+export interface BlogPost {
   id: number | string;
   slug: string;
   title: string;
@@ -82,19 +157,7 @@ export interface TransformedBlogPost {
 }
 
 /**
- * Bentuk data paginasi untuk post blog yang dikirim ke UI.
- */
-export interface PaginatedBlogPosts {
-  posts: TransformedBlogPost[];
-  totalPosts: number;
-  totalPages: number;
-  currentPage: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-/**
- * Parameter yang bisa digunakan untuk mengambil daftar post blog.
+ * Parameters for fetching a list of blog posts.
  */
 export interface GetBlogPostsParams {
   page?: number;
@@ -107,113 +170,8 @@ export interface GetBlogPostsParams {
 
 
 // =======================
-// === JOB & APPLICATION TYPES ===
-// =======================
-
-/**
- * Struktur data untuk sebuah lowongan pekerjaan.
- * (Definisi duplikat telah dihapus untuk menciptakan satu sumber kebenaran).
- */
-export interface Job {
-  id: string;
-  title: string;
-  companyName: string;
-  companyLogo: string;
-  location: string;
-  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship';
-  category: string;
-  salary?: number;
-  description: string;
-  requirements: string[];
-  postedAt: string; // ISO 8601 date string
-}
-
-/**
- * Struktur data untuk sebuah lamaran pekerjaan yang diterima dari API.
- */
-export interface Application {
-  id: string;
-  jobId: string;
-  jobTitle: string;
-  companyName: string;
-  appliedAt: string;
-  status: 'Pending' | 'Reviewed' | 'Interview' | 'Offered' | 'Rejected';
-}
-
-/**
- * ⭐️ PERBAIKAN UTAMA: Tipe data untuk form pengiriman lamaran.
- * Ini adalah tipe yang hilang yang menyebabkan error kompilasi.
- */
-export interface ApplicationFormData {
-  coverLetter?: string; // Biasanya berisi cover letter atau catatan tambahan.
-  // Anda bisa menambahkan properti lain di sini jika diperlukan,
-  // misalnya `resumeUrl: string` jika pengguna bisa memilih CV yang berbeda.
-}
-
-/**
- * Parameter untuk memfilter pencarian lowongan kerja.
- */
-export interface JobFilterParams {
-  query?: string;
-  location?: string;
-  type?: string;
-  category?: string;
-  page?: number;
-  limit?: number;
-}
-
-/**
- * Struktur data untuk profil pengguna/kandidat.
- */
-export interface UserProfile {
-  id: string;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  location: string;
-  headline: string;
-  summary: string;
-  cvUrl?: string;
-}
-
-export interface Experience {
-  id: string;
-  role: string;
-  company: string;
-  startDate: string;
-  endDate?: string;
-  description: string;
-}
-
-export interface Education {
-  id: string;
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate?: string;
-}
-
-export interface Skill {
-  id: string | number;
-  name: string;
-}
-
-export interface Company {
-  id: string | number;
-  name: string;
-  logoUrl: string;
-  tagline: string;
-  location: string;
-  industry: string;
-  activeJobsCount: number;
-}
-
-
-// =======================
 // === COMMUNITY TYPES ===
 // =======================
-// (Prefix 'I' dihilangkan untuk konsistensi)
 
 export interface CommunityAuthor {
   id: string;
@@ -239,8 +197,8 @@ export interface CommunityThread {
     views: number;
     likes: number;
   };
-  createdAt: string;
-  lastActivityAt: string;
+  createdAt: string; // ISO 8601 date string
+  lastActivityAt: string; // ISO 8601 date string
 }
 
 export interface CommunityApiResponse {
@@ -248,4 +206,3 @@ export interface CommunityApiResponse {
   topMembers: CommunityAuthor[];
   popularTags: CommunityTag[];
 }
-
