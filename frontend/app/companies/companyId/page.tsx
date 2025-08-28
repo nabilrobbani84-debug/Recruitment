@@ -12,13 +12,11 @@ import { Button } from '@/component/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/component/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/component/ui/Alert';
 
-// --- 1. Dynamic Metadata for SEO ---
-// This function generates dynamic metadata (like the page title) for each company page.
-// It fetches the data on the server before the page is rendered.
 type CompanyProfilePageProps = {
   params: { id: string };
 };
 
+// --- 1. Dynamic Metadata with Error Handling ---
 export async function generateMetadata({ params }: CompanyProfilePageProps): Promise<Metadata> {
   const companyId = parseInt(params.id, 10);
 
@@ -35,37 +33,32 @@ export async function generateMetadata({ params }: CompanyProfilePageProps): Pro
       description: company.tagline || `Explore career opportunities at ${company.name}.`,
     };
   } catch (error) {
-    // Return a title for the "Not Found" page
     return {
       title: 'Company Not Found',
     };
   }
 }
 
-// --- 2. Refactored Page Component ---
+// --- 2. Refactored Page Component with Robust Fetching ---
 export default async function CompanyProfilePage({ params }: CompanyProfilePageProps) {
+  // Validate the ID first
   const companyId = parseInt(params.id, 10);
-
   if (isNaN(companyId)) {
     notFound();
   }
 
-  // --- FIX: Initialize company to null ---
-  // We initialize `company` as potentially null to handle the fetching process gracefully.
+  // Safely initialize the company variable
   let company: ICompany | null = null;
   
+  // Use a try-catch block for fetching
   try {
     company = await getCompanyById(companyId);
   } catch (error) {
     console.error(`Failed to fetch company with ID ${companyId}:`, error);
-    // The `notFound()` function will stop execution and render the 404 page.
-    notFound();
+    notFound(); // Trigger 404 on fetch error
   }
   
-  // --- FIX: Add a Guard Clause ---
-  // This check ensures that if `company` is still null for any reason
-  // after the try-catch, we render a 404 page.
-  // Below this check, TypeScript knows `company` can no longer be null.
+  // Add a guard clause for type safety and edge cases
   if (!company) {
     notFound();
   }
@@ -137,17 +130,16 @@ export default async function CompanyProfilePage({ params }: CompanyProfilePageP
                     {(company.jobs && company.jobs.length > 0) ? (
                         <div className="space-y-4">
                             {company.jobs.map((job) => (
-                                // The `passHref` prop is no longer needed for this pattern in modern Next.js
                                 <Link key={job.id} href={`/jobs/${job.id}`}>
-                                  <div className="block p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer">
-                                      <div className="flex justify-between items-center">
-                                        <div>
-                                          <p className="font-bold text-lg text-gray-900 dark:text-white">{job.title}</p>
-                                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{job.location} • {job.type}</p>
+                                    <div className="block p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <p className="font-bold text-lg text-gray-900 dark:text-white">{job.title}</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{job.location} • {job.type}</p>
+                                            </div>
+                                            <Button variant="outline" size="sm">Lihat Detail</Button>
                                         </div>
-                                        <Button variant="outline" size="sm">Lihat Detail</Button>
-                                      </div>
-                                  </div>
+                                    </div>
                                 </Link>
                             ))}
                         </div>
