@@ -10,6 +10,42 @@ export interface PaginatedApiResponse<T> {
   };
 }
 
+
+export type Company = {
+  id: number;
+  name: string;
+  logoUrl: string;
+  tagline: string;
+  location: string;
+  activeJobsCount: number;
+};
+
+export interface ICompany {
+  id: number;
+  name: string;
+  logoUrl?: string;
+  location: string;
+  tagline?: string;
+  description?: string;
+  industry?: string;
+  website?: string;
+  activeJobsCount?: number;
+  jobs?: IJob[]; // An array of associated jobs
+}
+
+export interface IJob {
+  id: number;
+  title: string;
+  description: string;
+  location: string;
+  salary?: number;
+  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship';
+  category: string;
+  company?: ICompany; // A job can be associated with a company
+  requirements?: string[];
+  postedAt?: string; // ISO 8601 date string
+}
+
 /**
  * Struktur data mentah dari API untuk post blog (menggunakan snake_case).
  */

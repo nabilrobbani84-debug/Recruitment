@@ -4,6 +4,9 @@
 
 // Tipe untuk mendefinisikan struktur data sebuah perusahaan
 // Ini akan menjadi satu-satunya sumber kebenaran (single source of truth) untuk data perusahaan.
+
+import apiClient from '@/lib/apiClient';
+import { type ICompany, type IJob } from '@/lib/types';
 export interface ICompany {
   id: number;
   name: string;
@@ -40,7 +43,17 @@ export interface ICompanyApiResponse {
   currentPage: number;
 }
 
-
+export const getCompanyById = async (id: number): Promise<ICompany> => {
+  try {
+    const response = await apiClient.get<{ data: ICompany }>(`/companies/${id}`);
+    // The API wraps the company data in a 'data' object
+    return response.data.data;
+  } catch (error) {
+    console.error(`Error fetching company with ID ${id}:`, error);
+    // Re-throw the error to be handled by the calling component (e.g., to show a 404 page)
+    throw error;
+  }
+};
 // --- 2. Implementasi Fungsi Service ---
 
 /**
@@ -51,59 +64,33 @@ export interface ICompanyApiResponse {
  */
 export const getCompanies = async (params: GetCompaniesParams = {}): Promise<ICompanyApiResponse> => {
   console.log("Fetching companies with params:", params);
-  
-  try {
-    // Menyiapkan nilai default untuk pagination
-    const page = params.page || 1;
-    const limit = params.limit || 12; // 12 perusahaan per halaman
-
-    // --- Simulasi Data & Logika Backend ---
-    // Di aplikasi nyata, bagian ini akan diganti dengan panggilan API menggunakan fetch atau Axios.
-    // Contoh: const response = await apiClient.get('/companies', { params });
-
-    // Buat data dummy yang banyak untuk simulasi
-    const allMockCompanies: ICompany[] = Array.from({ length: 35 }, (_, i) => ({
+  // This function currently uses mock data. In a real app, it would
+  // use `apiClient` like `getCompanyById`.
+  const page = params.page || 1;
+  const limit = params.limit || 12;
+  const allMockCompanies: ICompany[] = Array.from({ length: 35 }, (_, i) => ({
       id: i + 1,
-      name: `Perusahaan ${['Inovasi', 'Teknologi', 'Digital', 'Kreatif', 'Maju'][i % 5]} #${i + 1}`,
+      name: `Perusahaan Fiktif #${i + 1}`,
       logoUrl: `https://placehold.co/100x100/e0e7ff/4338ca?text=P${i + 1}`,
-      industry: ['Teknologi Informasi', 'Keuangan', 'Kesehatan', 'Pendidikan', 'Retail'][i % 5],
+      industry: ['Teknologi', 'Keuangan', 'Kesehatan', 'Pendidikan', 'Retail'][i % 5],
       location: ['Jakarta', 'Bandung', 'Surabaya', 'Remote'][i % 4],
-      totalJobs: 3 + (i % 10),
+      activeJobsCount: 3 + (i % 10),
       tagline: 'Membangun masa depan digital.',
-      isHiring: i % 2 === 0,
-    }));
+      description: 'Deskripsi lengkap tentang perusahaan fiktif ini.',
+      website: 'https://example.com',
+  }));
+  
+  const filtered = allMockCompanies.filter(c => 
+      (params.search ? c.name.toLowerCase().includes(params.search.toLowerCase()) : true) &&
+      (params.location ? c.location === params.location : true)
+  );
 
-    // Simulasi logika filter di backend
-    const filteredCompanies = allMockCompanies.filter(company => {
-      const searchMatch = params.search 
-        ? company.name.toLowerCase().includes(params.search.toLowerCase()) 
-        : true;
-      const locationMatch = params.location 
-        ? company.location === params.location 
-        : true;
-      // ... tambahkan logika filter lain di sini ...
-      return searchMatch && locationMatch;
-    });
+  await new Promise(resolve => setTimeout(resolve, 500)); 
 
-    // Simulasi logika pagination di backend
-    const totalItems = filteredCompanies.length;
-    const totalPages = Math.ceil(totalItems / limit);
-    const paginatedData = filteredCompanies.slice((page - 1) * limit, page * limit);
-
-    // Simulasi penundaan jaringan (network delay)
-    await new Promise(resolve => setTimeout(resolve, 500)); 
-
-    // Mengembalikan data dengan struktur yang diharapkan oleh frontend
-    return {
-      companies: paginatedData,
-      totalCompanies: totalItems,
-      totalPages: totalPages,
-      currentPage: page,
-    };
-
-  } catch (error) {
-    console.error('Error fetching companies:', error);
-    // Jika terjadi error, lempar kembali agar bisa ditangani oleh komponen pemanggil
-    throw new Error('Gagal mengambil data perusahaan dari server.');
-  }
+  return {
+    companies: filtered.slice((page - 1) * limit, page * limit),
+    totalCompanies: filtered.length,
+    totalPages: Math.ceil(filtered.length / limit),
+    currentPage: page,
+  };
 };
