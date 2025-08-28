@@ -1,4 +1,3 @@
-// src/app/(dashboard-employer)/jobs/page.tsx
 import Link from 'next/link';
 import DashboardPageHeader from '@/component/common/DashboardPageHeader';
 import Button from '@/component/common/Button';
@@ -15,15 +14,14 @@ const mockJobs = [
 // Komponen Badge Status
 const StatusBadge = ({ status }: { status: string }) => {
   const baseClasses = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
-  const statusClasses = {
+  const statusClasses: { [key: string]: string } = {
     Aktif: "bg-green-100 text-green-800",
     Ditutup: "bg-red-100 text-red-800",
     Draft: "bg-yellow-100 text-yellow-800",
   };
-  const className = statusClasses[status as keyof typeof statusClasses] || "bg-gray-100 text-gray-800";
+  const className = statusClasses[status] || "bg-gray-100 text-gray-800";
   return <span className={`${baseClasses} ${className}`}>{status}</span>;
 };
-
 
 export default function ManageJobsPage() {
   return (

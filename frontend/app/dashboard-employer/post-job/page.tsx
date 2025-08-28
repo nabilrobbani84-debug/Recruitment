@@ -1,7 +1,7 @@
 // src/app/(dashboard-employer)/post-job/page.tsx
 'use client';
 import React from 'react';
-import SectionTitle from '@/components/common/SectionTitle';
+import SectionTitle from '@/component/common/SectionTitle';
 
 // Sebaiknya ini menjadi komponen sendiri `JobPostForm.tsx` di `src/components/employer/`
 const JobPostForm = () => {

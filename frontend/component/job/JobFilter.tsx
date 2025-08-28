@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { useJobStore } from '@/store/jobStore';
-import { InputField } from '@/component/common/InputField';
+// --- FIX: Remove curly braces to use default import ---
+import InputField from '@/component/common/InputField'; 
 import { Search, MapPin, Briefcase } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
-// --- FIX: Define the props the component accepts ---
 interface JobFilterProps {
   initialFilters: {
     keyword?: string;
@@ -15,11 +15,9 @@ interface JobFilterProps {
   };
 }
 
-// --- FIX: Use the defined props ---
 const JobFilter = ({ initialFilters }: JobFilterProps) => {
   const { filters, setFilters } = useJobStore();
 
-  // Local state for inputs, initialized from props passed by the server
   const [keyword, setKeyword] = React.useState(initialFilters.keyword || '');
   const [location, setLocation] = React.useState(initialFilters.location || '');
 
@@ -27,16 +25,21 @@ const JobFilter = ({ initialFilters }: JobFilterProps) => {
   const debouncedLocation = useDebounce(location, 500);
 
   React.useEffect(() => {
-    setFilters({ keyword: debouncedKeyword });
-  }, [debouncedKeyword, setFilters]);
+    // Hanya perbarui jika nilai debounce berubah
+    if (debouncedKeyword !== filters.keyword) {
+      setFilters({ keyword: debouncedKeyword });
+    }
+  }, [debouncedKeyword, setFilters, filters.keyword]);
 
   React.useEffect(() => {
-    setFilters({ location: debouncedLocation });
-  }, [debouncedLocation, setFilters]);
+    // Hanya perbarui jika nilai debounce berubah
+    if (debouncedLocation !== filters.location) {
+      setFilters({ location: debouncedLocation });
+    }
+  }, [debouncedLocation, setFilters, filters.location]);
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    // Handle the "All" case by setting the filter to undefined
     setFilters({ type: value === 'All' ? undefined : value });
   };
 
@@ -61,7 +64,7 @@ const JobFilter = ({ initialFilters }: JobFilterProps) => {
           onChange={(e) => setLocation(e.target.value)}
         />
         <div>
-          <label htmlFor="job-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="job-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tipe Pekerjaan
           </label>
           <div className="relative">
@@ -69,16 +72,15 @@ const JobFilter = ({ initialFilters }: JobFilterProps) => {
             <select
               id="job-type"
               name="type"
-              // Use the initial prop for the first render, then the global store state
-              value={filters.type || initialFilters.type || 'All'}
+              value={filters.type || 'All'}
               onChange={handleTypeChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none"
             >
-              <option value="All">All</option>
+              <option value="All">Semua Tipe</option>
               <option value="Full-time">Full-time</option>
               <option value="Part-time">Part-time</option>
-              <option value="Contract">Contract</option>
-              <option value="Internship">Internship</option>
+              <option value="Contract">Kontrak</option>
+              <option value="Internship">Magang</option>
             </select>
           </div>
         </div>
