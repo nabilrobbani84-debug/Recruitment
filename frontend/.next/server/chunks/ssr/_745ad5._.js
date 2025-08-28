@@ -959,6 +959,7 @@ async function CompaniesPage({ searchParams }) {
     let itJobs = [];
     let fetchError = null;
     try {
+        // Menggunakan Promise.all untuk fetch data secara paralel agar lebih efisien.
         const [companyResponse, itJobsResponse] = await Promise.all([
             (0, __TURBOPACK__imported__module__$5b$project$5d2f$services$2f$companyService$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getCompanies"])(searchParams),
             (0, __TURBOPACK__imported__module__$5b$project$5d2f$services$2f$jobService$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getFeaturedJobs"])({
@@ -972,39 +973,43 @@ async function CompaniesPage({ searchParams }) {
         console.error('Failed to fetch data for companies page:', error);
         fetchError = 'Gagal memuat data. Silakan coba beberapa saat lagi.';
     }
+    // Penanganan error yang baik: Menampilkan pesan jika fetch gagal atau data tidak ada.
     if (fetchError || !companyData) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
-            className: "container mx-auto px-4 py-12 flex justify-center",
+            className: "container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-12",
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$component$2f$ui$2f$Alert$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Alert"], {
                 variant: "destructive",
                 title: "Terjadi Kesalahan",
                 children: fetchError || 'Tidak dapat memuat data perusahaan.'
             }, void 0, false, {
                 fileName: "[project]/app/companies/page.tsx",
-                lineNumber: 43,
+                lineNumber: 44,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/companies/page.tsx",
-            lineNumber: 42,
+            lineNumber: 43,
             columnNumber: 7
         }, this);
     }
     const { companies, totalCompanies, totalPages, currentPage } = companyData;
-    // --- FIX: Transformasi data dari ICompanyFromService menjadi Company ---
-    // Proses ini memastikan setiap objek yang dirender memiliki semua properti yang
-    // dibutuhkan oleh komponen CompanyCard, dengan nilai default jika properti asli tidak ada.
+    // --- FIX: Transformasi dan Validasi Data ---
+    // Proses ini memastikan setiap objek yang akan dirender oleh CompanyCard
+    // memiliki semua properti yang dibutuhkan dengan tipe yang benar.
+    // Ini adalah langkah krusial untuk mencegah runtime error.
     const companiesForDisplay = companies.map((companyFromService)=>{
         return {
-            // Salin semua properti yang ada dari data layanan
+            // Salin semua properti yang sudah ada dari data layanan
             ...companyFromService,
-            // Pastikan properti yang dibutuhkan oleh CompanyCard ada dan memiliki tipe yang benar
+            // Pastikan properti yang dibutuhkan ada dan memiliki tipe yang benar
+            // dengan memberikan nilai default (fallback) jika datanya null, undefined, atau kosong.
             id: companyFromService.id,
             name: companyFromService.name || 'Nama Perusahaan Tidak Tersedia',
             logoUrl: companyFromService.logoUrl || 'https://placehold.co/64x64/eee/ccc?text=Logo',
             location: companyFromService.location || 'Lokasi Tidak Diketahui',
             tagline: companyFromService.tagline || 'Tagline perusahaan tidak tersedia.',
-            // Ini adalah properti kunci yang menyebabkan error. Pastikan selalu ada sebagai angka.
+            // Ini adalah properti kunci yang berpotensi menyebabkan error.
+            // Kita pastikan nilainya selalu angka (number), default-nya 0.
             activeJobsCount: companyFromService.activeJobsCount || 0
         };
     });
@@ -1021,7 +1026,7 @@ async function CompaniesPage({ searchParams }) {
                             children: "Temukan Perusahaan Impian Anda"
                         }, void 0, false, {
                             fileName: "[project]/app/companies/page.tsx",
-                            lineNumber: 76,
+                            lineNumber: 80,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1029,13 +1034,13 @@ async function CompaniesPage({ searchParams }) {
                             children: "Jelajahi profil perusahaan-perusahaan inovatif dan temukan budaya kerja yang cocok untuk Anda."
                         }, void 0, false, {
                             fileName: "[project]/app/companies/page.tsx",
-                            lineNumber: 77,
+                            lineNumber: 81,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 75,
+                    lineNumber: 79,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$component$2f$common$2f$SearchBar$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["SearchBar"], {
@@ -1043,19 +1048,19 @@ async function CompaniesPage({ searchParams }) {
                     basePath: "/companies"
                 }, void 0, false, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 82,
+                    lineNumber: 86,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "my-8",
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$component$2f$company$2f$CompanyCategoryFilters$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["CompanyCategoryFilters"], {}, void 0, false, {
                         fileName: "[project]/app/companies/page.tsx",
-                        lineNumber: 85,
-                        columnNumber: 13
+                        lineNumber: 89,
+                        columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 84,
+                    lineNumber: 88,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -1070,7 +1075,7 @@ async function CompaniesPage({ searchParams }) {
                                         children: companiesForDisplay.length
                                     }, void 0, false, {
                                         fileName: "[project]/app/companies/page.tsx",
-                                        lineNumber: 92,
+                                        lineNumber: 96,
                                         columnNumber: 29
                                     }, this),
                                     " dari",
@@ -1080,14 +1085,14 @@ async function CompaniesPage({ searchParams }) {
                                         children: totalCompanies
                                     }, void 0, false, {
                                         fileName: "[project]/app/companies/page.tsx",
-                                        lineNumber: 93,
+                                        lineNumber: 97,
                                         columnNumber: 17
                                     }, this),
                                     " perusahaan."
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/companies/page.tsx",
-                                lineNumber: 91,
+                                lineNumber: 95,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1096,12 +1101,12 @@ async function CompaniesPage({ searchParams }) {
                                         company: company
                                     }, company.id, false, {
                                         fileName: "[project]/app/companies/page.tsx",
-                                        lineNumber: 98,
+                                        lineNumber: 102,
                                         columnNumber: 19
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/app/companies/page.tsx",
-                                lineNumber: 95,
+                                lineNumber: 99,
                                 columnNumber: 15
                             }, this)
                         ]
@@ -1113,7 +1118,7 @@ async function CompaniesPage({ searchParams }) {
                                 children: "Perusahaan Tidak Ditemukan"
                             }, void 0, false, {
                                 fileName: "[project]/app/companies/page.tsx",
-                                lineNumber: 104,
+                                lineNumber: 108,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1121,18 +1126,18 @@ async function CompaniesPage({ searchParams }) {
                                 children: "Coba gunakan kata kunci pencarian atau filter yang lain."
                             }, void 0, false, {
                                 fileName: "[project]/app/companies/page.tsx",
-                                lineNumber: 105,
+                                lineNumber: 109,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/companies/page.tsx",
-                        lineNumber: 103,
+                        lineNumber: 107,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 88,
+                    lineNumber: 92,
                     columnNumber: 9
                 }, this),
                 totalPages > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1142,12 +1147,12 @@ async function CompaniesPage({ searchParams }) {
                         currentPage: currentPage
                     }, void 0, false, {
                         fileName: "[project]/app/companies/page.tsx",
-                        lineNumber: 112,
+                        lineNumber: 116,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 111,
+                    lineNumber: 115,
                     columnNumber: 11
                 }, this),
                 itJobs.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -1158,7 +1163,7 @@ async function CompaniesPage({ searchParams }) {
                             subtitle: "Peluang teratas di bidang teknologi menanti Anda."
                         }, void 0, false, {
                             fileName: "[project]/app/companies/page.tsx",
-                            lineNumber: 118,
+                            lineNumber: 122,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1167,34 +1172,34 @@ async function CompaniesPage({ searchParams }) {
                                     job: job
                                 }, job.id, false, {
                                     fileName: "[project]/app/companies/page.tsx",
-                                    lineNumber: 121,
+                                    lineNumber: 125,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/app/companies/page.tsx",
-                            lineNumber: 119,
+                            lineNumber: 123,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 117,
+                    lineNumber: 121,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$component$2f$company$2f$RecommendedJobs$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["RecommendedJobs"], {}, void 0, false, {
                     fileName: "[project]/app/companies/page.tsx",
-                    lineNumber: 127,
+                    lineNumber: 131,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/companies/page.tsx",
-            lineNumber: 74,
+            lineNumber: 78,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/companies/page.tsx",
-        lineNumber: 73,
+        lineNumber: 77,
         columnNumber: 5
     }, this);
 }

@@ -1,18 +1,24 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, type AuthState } from '@/store/authStore'; // Impor tipe AuthState
 import { getRecommendedJobs, type IJob } from '@/services/jobService';
-import SectionTitle from '@/component/common/SectionTitle'; // PERBAIKAN: Impor sebagai default
-import JobCard from '@/component/job/JobCard'; // PERBAIKAN: Impor sebagai default
+import SectionTitle from '@/component/common/SectionTitle';
+// --- FIX 1: Mengubah impor dari default menjadi named import ---
+// Pesan error menunjukkan bahwa 'JobCard' bukanlah default export.
+import { JobCard } from '@/component/job/JobCard'; 
 import { Loader2 } from 'lucide-react';
 
-export function RecommendedJobs() {
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+// Komponen ini sekarang diekspor sebagai named export agar konsisten
+export const RecommendedJobs = () => {
+  // --- FIX 2: Memberikan tipe eksplisit pada selector Zustand ---
+  // Ini memberitahu TypeScript tentang struktur state dan mengatasi error.
+  const isAuthenticated = useAuthStore((state: AuthState) => state.isAuthenticated);
   const [recommendedJobs, setRecommendedJobs] = useState<IJob[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // Hanya fetch data jika pengguna sudah terautentikasi
     if (isAuthenticated) {
       const fetchRecommendations = async () => {
         setIsLoading(true);
@@ -21,6 +27,7 @@ export function RecommendedJobs() {
           setRecommendedJobs(response.data);
         } catch (error) {
           console.error("Failed to fetch recommendations:", error);
+          // Secara opsional, Anda bisa menampilkan pesan error di UI di sini
         } finally {
           setIsLoading(false);
         }
@@ -29,10 +36,12 @@ export function RecommendedJobs() {
     }
   }, [isAuthenticated]);
 
+  // Jika pengguna belum login, komponen tidak akan merender apa pun.
   if (!isAuthenticated) {
     return null;
   }
   
+  // Menampilkan indikator loading saat data sedang diambil.
   if (isLoading) {
     return (
         <section className="mt-20">
@@ -47,6 +56,8 @@ export function RecommendedJobs() {
     );
   }
 
+  // Jika tidak ada pekerjaan yang direkomendasikan setelah fetch selesai,
+  // komponen juga tidak akan merender apa pun agar tidak ada section kosong.
   if (recommendedJobs.length === 0) {
       return null;
   }

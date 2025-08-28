@@ -1,19 +1,21 @@
 // src/app/companies/page.tsx
 
 import React from 'react';
-// Impor tipe data dari sumber yang sama dengan yang digunakan oleh CompanyCard
-import { type Company } from '@/lib/types'; 
+import Link from 'next/link';
+import { type Company } from '@/lib/types';
 import { getCompanies, type GetCompaniesParams, type ICompany as ICompanyFromService } from '@/services/companyService';
 import { getFeaturedJobs, type IJob } from '@/services/jobService';
 import { CompanyCard } from '@/component/company/CompanyCard';
 import { JobCard } from '@/component/job/JobCard';
 import { SearchBar } from '@/component/common/SearchBar';
 import { Pagination } from '@/component/common/Pagination';
-import { SectionTitle } from '@/component/common/SectionTitle';
+// --- FIX: Mengubah cara impor dari named menjadi default ---
+import SectionTitle from '@/component/common/SectionTitle'; 
 import { RecommendedJobs } from '@/component/company/RecommendedJobs';
 import { Alert } from '@/component/ui/Alert';
 import { CompanyCategoryFilters } from '@/component/company/CompanyCategoryFilters';
-
+import { Button } from '@/component/ui/Button';
+import { ArrowRight } from 'lucide-react';
 
 interface CompaniesPageProps {
   searchParams: GetCompaniesParams;
@@ -39,7 +41,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
 
   if (fetchError || !companyData) {
     return (
-      <main className="container mx-auto px-4 py-12 flex justify-center">
+      <main className="container mx-auto flex min-h-[60vh] items-center justify-center px-4 py-12">
         <Alert variant="destructive" title="Terjadi Kesalahan">
           {fetchError || 'Tidak dapat memuat data perusahaan.'}
         </Alert>
@@ -49,27 +51,17 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
 
   const { companies, totalCompanies, totalPages, currentPage } = companyData;
 
-  // --- FIX: Transformasi data dari ICompanyFromService menjadi Company ---
-  // Proses ini memastikan setiap objek yang dirender memiliki semua properti yang
-  // dibutuhkan oleh komponen CompanyCard, dengan nilai default jika properti asli tidak ada.
-  const companiesForDisplay: Company[] = companies.map((companyFromService) => {
-    return {
-      // Salin semua properti yang ada dari data layanan
-      ...companyFromService,
+  const companiesForDisplay: Company[] = companies.map((companyFromService) => ({
+    ...companyFromService,
+    id: companyFromService.id,
+    name: companyFromService.name || 'Nama Perusahaan Tidak Tersedia',
+    logoUrl: companyFromService.logoUrl || 'https://placehold.co/64x64/eee/ccc?text=Logo',
+    location: companyFromService.location || 'Lokasi Tidak Diketahui',
+    tagline: companyFromService.tagline || 'Tagline perusahaan tidak tersedia.',
+    activeJobsCount: companyFromService.activeJobsCount || 0,
+  }));
 
-      // Pastikan properti yang dibutuhkan oleh CompanyCard ada dan memiliki tipe yang benar
-      id: companyFromService.id,
-      name: companyFromService.name || 'Nama Perusahaan Tidak Tersedia',
-      logoUrl: companyFromService.logoUrl || 'https://placehold.co/64x64/eee/ccc?text=Logo', // Fallback image
-      location: companyFromService.location || 'Lokasi Tidak Diketahui',
-      tagline: companyFromService.tagline || 'Tagline perusahaan tidak tersedia.',
-      
-      // Ini adalah properti kunci yang menyebabkan error. Pastikan selalu ada sebagai angka.
-      activeJobsCount: companyFromService.activeJobsCount || 0,
-    };
-  });
-
-  return (  
+  return (
     <main className="bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-10">
@@ -82,7 +74,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
         <SearchBar placeholder="Cari nama perusahaan..." basePath="/companies" />
         
         <div className="my-8">
-            <CompanyCategoryFilters />
+          <CompanyCategoryFilters />
         </div>
 
         <section>
@@ -93,7 +85,6 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
                 <span className="font-bold text-gray-800 dark:text-white">{totalCompanies}</span> perusahaan.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {/* Gunakan data yang sudah ditransformasi dan aman secara tipe */}
                 {companiesForDisplay.map((company) => (
                   <CompanyCard key={company.id} company={company} />
                 ))}
@@ -115,7 +106,18 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
 
         {itJobs.length > 0 && (
           <section className="mt-20">
-            <SectionTitle title="Lowongan IT di Berbagai Perusahaan" subtitle="Peluang teratas di bidang teknologi menanti Anda." />
+            <SectionTitle 
+              title="Lowongan IT di Berbagai Perusahaan" 
+              subtitle="Peluang teratas di bidang teknologi menanti Anda."
+              actions={
+                <Link href="/jobs?category=it" passHref>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    Lihat Semua
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              }
+            />
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {itJobs.map((job) => (
                 <JobCard key={job.id} job={job} />
