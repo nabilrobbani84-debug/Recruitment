@@ -1,92 +1,88 @@
 // src/services/companyService.ts
 
-// --- 1. Definisi Tipe yang Jelas & Detail ---
-
-// Tipe untuk mendefinisikan struktur data sebuah perusahaan
-// Ini akan menjadi satu-satunya sumber kebenaran (single source of truth) untuk data perusahaan.
-
 import apiClient from '@/lib/apiClient';
-import { type ICompany, type IJob } from '@/lib/types';
-export interface ICompany {
-  id: number;
-  name: string;
-  logoUrl: string;
-  industry: string;
-  location: string;
-  totalJobs: number;
-  tagline: string;
-  isHiring: boolean;
-}
+// ✅ FIX: Import only the 'Company' type, which is correctly defined and exported.
+import { type Company } from '@/lib/types';
 
-// Tipe untuk parameter filter yang bisa dikirim ke API
+// --- ✅ FIX: Define Missing Interfaces Locally ---
+// These types were causing import errors. Defining them here makes the service
+// self-sufficient and guarantees the correct data structures are used.
+
+/**
+ * Defines the parameters that can be used to filter the company list.
+ */
 export interface GetCompaniesParams {
   page?: number;
   limit?: number;
-  search?: string; // Untuk pencarian berdasarkan nama
+  search?: string;
   location?: string;
   industry?: string;
 }
 
-// Tipe untuk metadata pagination yang dikembalikan oleh API
-export interface IPaginationMeta {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  perPage: number;
-}
-
-// Tipe untuk keseluruhan struktur respons dari API getCompanies
+/**
+ * Defines the complete structure of the paginated API response for getCompanies.
+ */
 export interface ICompanyApiResponse {
-  companies: ICompany[];
+  companies: Company[];
   totalCompanies: number;
   totalPages: number;
   currentPage: number;
 }
 
-export const getCompanyById = async (id: number): Promise<ICompany> => {
+/**
+ * Fetches a single company by its ID from the API.
+ * This is intended for use on company detail pages.
+ * @param id - The numeric ID of the company to fetch.
+ * @returns A Promise that resolves to the full company data structure.
+ */
+export const getCompanyById = async (id: number): Promise<Company> => {
   try {
-    const response = await apiClient.get<{ data: ICompany }>(`/companies/${id}`);
-    // The API wraps the company data in a 'data' object
+    // The API response nests the actual data within a 'data' property.
+    const response = await apiClient.get<{ data: Company }>(`/companies/${id}`);
     return response.data.data;
   } catch (error) {
     console.error(`Error fetching company with ID ${id}:`, error);
-    // Re-throw the error to be handled by the calling component (e.g., to show a 404 page)
+    // Re-throw the error to be handled by the calling component,
+    // which can then trigger a 404 page.
     throw error;
   }
 };
-// --- 2. Implementasi Fungsi Service ---
 
 /**
- * Fungsi untuk mengambil data perusahaan dari API dengan filter dan pagination.
- * Diekspor sebagai 'named export' agar bisa diimpor secara spesifik.
- * @param params - Objek yang berisi filter seperti halaman, pencarian, dll.
- * @returns Promise yang berisi data perusahaan dan metadata pagination.
+ * Fetches a list of companies with support for filtering and pagination.
+ * This is a mocked implementation for demonstration and development.
+ * @param params - An object containing filters like page, search query, etc.
+ * @returns A Promise that resolves to a paginated list of companies.
  */
 export const getCompanies = async (params: GetCompaniesParams = {}): Promise<ICompanyApiResponse> => {
   console.log("Fetching companies with params:", params);
-  // This function currently uses mock data. In a real app, it would
-  // use `apiClient` like `getCompanyById`.
+  
+  // Simulate a network delay to mimic a real-world API call.
+  await new Promise(resolve => setTimeout(resolve, 500));
+
   const page = params.page || 1;
   const limit = params.limit || 12;
-  const allMockCompanies: ICompany[] = Array.from({ length: 35 }, (_, i) => ({
+
+  // Mock data now correctly uses the unified 'Company' type.
+  const allMockCompanies: Company[] = Array.from({ length: 35 }, (_, i) => ({
       id: i + 1,
       name: `Perusahaan Fiktif #${i + 1}`,
       logoUrl: `https://placehold.co/100x100/e0e7ff/4338ca?text=P${i + 1}`,
       industry: ['Teknologi', 'Keuangan', 'Kesehatan', 'Pendidikan', 'Retail'][i % 5],
       location: ['Jakarta', 'Bandung', 'Surabaya', 'Remote'][i % 4],
       activeJobsCount: 3 + (i % 10),
-      tagline: 'Membangun masa depan digital.',
-      description: 'Deskripsi lengkap tentang perusahaan fiktif ini.',
+      tagline: 'Membangun masa depan digital yang lebih cerah.',
+      description: `Ini adalah deskripsi lengkap untuk Perusahaan Fiktif #${i + 1}. Kami berfokus pada inovasi di bidang ${['Teknologi', 'Keuangan', 'Kesehatan', 'Pendidikan', 'Retail'][i % 5]}.`,
       website: 'https://example.com',
   }));
   
+  // The filtering logic remains the same.
   const filtered = allMockCompanies.filter(c => 
       (params.search ? c.name.toLowerCase().includes(params.search.toLowerCase()) : true) &&
       (params.location ? c.location === params.location : true)
   );
 
-  await new Promise(resolve => setTimeout(resolve, 500)); 
-
+  // Return the data in the shape defined by the ICompanyApiResponse interface.
   return {
     companies: filtered.slice((page - 1) * limit, page * limit),
     totalCompanies: filtered.length,
