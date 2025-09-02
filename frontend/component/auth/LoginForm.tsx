@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-// --- PERBAIKAN: Gunakan named import untuk komponen ---
-import { InputField } from '@/component/common/InputField';
-import { Button } from '@/component/common/Button';
-import { Alert } from '@/component/common/Alert'; // Impor komponen Alert
+import InputField from '@/component/common/InputField';
+import Button from '@/component/common/Button';
+// ✅ FIX: Changed the import for 'Alert' from a default to a named import.
+import { Alert } from '@/component/common/Alert';
 
+/**
+ * A login form component that handles user input, form submission,
+ * error handling, and redirection upon successful login.
+ */
 export default function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
@@ -26,6 +30,7 @@ export default function LoginForm() {
     try {
       const loggedInUser = await login(email, password);
       
+      // Redirect the user based on their role after a successful login.
       if (loggedInUser.role === 'candidate') {
         router.push('/dashboard-candidate/profile');
       } else if (loggedInUser.role === 'employer') {
@@ -35,11 +40,11 @@ export default function LoginForm() {
       }
 
     } catch (err) {
-      // --- PERBAIKAN: Penanganan error yang lebih aman ---
+      // Safer and more informative error handling.
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Terjadi kesalahan yang tidak diketahui.');
+        setError('An unknown error occurred.');
       }
     } finally {
       setIsLoading(false);
@@ -49,18 +54,16 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        // Menggunakan komponen Alert yang konsisten
-        <Alert variant="danger" title="Login Gagal">
+        <Alert variant="danger" title="Login Failed">
           {error}
         </Alert>
       )}
       <InputField
-        label="Alamat Email"
+        label="Email Address"
         name="email"
         type="email"
         Icon={Mail}
         value={email}
-        // --- PERBAIKAN: Tambahkan tipe untuk event 'e' ---
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
         placeholder="candidate@example.com"
         required
@@ -72,7 +75,6 @@ export default function LoginForm() {
         type="password"
         Icon={Lock}
         value={password}
-        // --- PERBAIKAN: Tambahkan tipe untuk event 'e' ---
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
         placeholder="password"
         required
@@ -87,13 +89,13 @@ export default function LoginForm() {
             className="h-4 w-4 text-primary focus:ring-primary-dark border-gray-300 rounded"
           />
           <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-            Ingat Saya
+            Remember me
           </label>
         </div>
         <div className="text-sm">
           <Link href="/auth/Forgot-Password" legacyBehavior>
             <a className="font-medium text-blue-600 hover:text-blue-500">
-              Lupa password?
+              Forgot your password?
             </a>
           </Link>
         </div>
@@ -101,14 +103,14 @@ export default function LoginForm() {
 
       <Button type="submit" className="w-full" isLoading={isLoading}>
         <LogIn className="mr-2 h-5 w-5" />
-        Masuk
+        Sign In
       </Button>
 
       <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-        Belum punya akun?{' '}
+        Not a member?{' '}
         <Link href="/auth/Register" legacyBehavior>
           <a className="font-medium text-blue-600 hover:text-blue-500">
-            Daftar di sini
+            Sign up here
           </a>
         </Link>
       </p>

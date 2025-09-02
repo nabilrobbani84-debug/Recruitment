@@ -6,7 +6,8 @@ import { ProfileForm } from '@/component/candidate/ProfileForm';
 import { ExperienceCard } from '@/component/candidate/ExperienceCard';
 import { EducationCard } from '@/component/candidate/EducationCard';
 import { CVUpload } from '@/component/candidate/CVUpload';
-import { Button } from '@/component/common/Button';
+// ✅ FIX: Mengubah impor Button menjadi default import.
+import Button from '@/component/common/Button';
 import { profileService } from '@/services/profileService';
 // FIX 2: Impor tipe dari sumber terpusat
 import { UserProfile, Experience, Education } from '@/lib/types';

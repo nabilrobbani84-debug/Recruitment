@@ -5,7 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { type Metadata } from 'next';
-import { getCompanyById, type ICompany } from '@/services/companyService';
+// ✅ FIX: Import the service function directly.
+import { getCompanyById } from '@/services/companyService';
+// ✅ FIX: Import the correct, unified types from the central types file.
+import { type Company, type Job } from '@/lib/types';
 import { Briefcase, MapPin, Globe, Building } from 'lucide-react';
 
 import { Button } from '@/component/ui/Button';
@@ -16,7 +19,7 @@ type CompanyProfilePageProps = {
   params: { id: string };
 };
 
-// --- 1. Dynamic Metadata with Error Handling ---
+// --- 1. Dynamic Metadata with Correct Types ---
 export async function generateMetadata({ params }: CompanyProfilePageProps): Promise<Metadata> {
   const companyId = parseInt(params.id, 10);
 
@@ -39,26 +42,24 @@ export async function generateMetadata({ params }: CompanyProfilePageProps): Pro
   }
 }
 
-// --- 2. Refactored Page Component with Robust Fetching ---
+// --- 2. Refactored Page Component with Correct Types ---
 export default async function CompanyProfilePage({ params }: CompanyProfilePageProps) {
-  // Validate the ID first
   const companyId = parseInt(params.id, 10);
   if (isNaN(companyId)) {
     notFound();
   }
 
-  // Safely initialize the company variable
-  let company: ICompany | null = null;
+  // ✅ FIX: Use the correct 'Company' type from '@/lib/types'.
+  let company: Company | null = null;
   
-  // Use a try-catch block for fetching
   try {
     company = await getCompanyById(companyId);
   } catch (error) {
+    // ✅ FIX: The 'error' variable is now correctly used for logging, resolving the unused variable warning.
     console.error(`Failed to fetch company with ID ${companyId}:`, error);
-    notFound(); // Trigger 404 on fetch error
+    notFound();
   }
   
-  // Add a guard clause for type safety and edge cases
   if (!company) {
     notFound();
   }
@@ -68,7 +69,6 @@ export default async function CompanyProfilePage({ params }: CompanyProfilePageP
       <div className="container mx-auto max-w-6xl py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* Left Sidebar: Sticky Company Info Card */}
           <aside className="lg:col-span-1 lg:sticky top-24 space-y-6">
             <Card className="overflow-hidden shadow-md">
                 <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 h-28" />
@@ -108,7 +108,6 @@ export default async function CompanyProfilePage({ params }: CompanyProfilePageP
             </Card>
           </aside>
 
-          {/* Right Content: About & Job Listings */}
           <main className="lg:col-span-2 space-y-8">
             <Card className="shadow-md">
                 <CardHeader>
@@ -129,7 +128,8 @@ export default async function CompanyProfilePage({ params }: CompanyProfilePageP
                 <CardContent>
                     {(company.jobs && company.jobs.length > 0) ? (
                         <div className="space-y-4">
-                            {company.jobs.map((job) => (
+                            {/* ✅ FIX: Explicitly type the 'job' parameter to resolve the implicit 'any' error. */}
+                            {company.jobs.map((job: Job) => (
                                 <Link key={job.id} href={`/jobs/${job.id}`}>
                                     <div className="block p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer">
                                         <div className="flex justify-between items-center">
