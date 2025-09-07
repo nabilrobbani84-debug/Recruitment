@@ -2,57 +2,57 @@ import React from 'react';
 
 /**
  * Interface untuk props komponen DashboardPageHeader.
- * @param title Judul utama halaman, wajib diisi.
- * @param subtitle Deskripsi singkat atau subjudul di bawah judul utama, wajib diisi.
- * @param actions Element React opsional untuk tombol aksi (misalnya, <Button> atau <Link>).
- * @param children Element React opsional jika ingin menambahkan konten tambahan di bawah header.
+ * @param title Judul utama halaman yang besar dan tebal.
+ * @param description Deskripsi singkat di bawah judul untuk memberikan konteks.
+ * @param actions Area untuk tombol-tombol aksi, seperti "Tambah Baru" atau "Ekspor".
+ * @param children Konten tambahan yang bisa disisipkan di bawah header, seperti filter atau tab.
  */
 interface DashboardPageHeaderProps {
   title: string;
-  subtitle: string;
+  description?: string;
   actions?: React.ReactNode;
   children?: React.ReactNode;
 }
 
 /**
- * DashboardPageHeader adalah komponen reusable untuk menampilkan header halaman dasbor.
- * Komponen ini mencakup judul, subjudul, dan area untuk tombol aksi.
- * Didesain agar responsif di berbagai ukuran layar.
+ * DashboardPageHeader
+ * Komponen header yang modern dan responsif untuk halaman dasbor.
+ * Didesain dengan flexbox untuk penataan yang solid di semua ukuran layar.
+ * Menggunakan warna dan spacing yang konsisten dengan desain sistem modern.
  */
-const DashboardPageHeader: React.FC<DashboardPageHeaderProps> = ({ 
+export function DashboardPageHeader({ 
   title, 
-  subtitle, 
+  description, 
   actions,
   children 
-}) => {
+}: DashboardPageHeaderProps) {
   return (
-    <header className="mb-8">
-      <div className="border-b border-gray-200 pb-5">
-        <div className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap">
-          {/* Bagian Kiri: Judul dan Subjudul */}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl sm:truncate">
-              {title}
-            </h1>
-            <p className="mt-2 text-sm text-gray-500 max-w-2xl">
-              {subtitle}
+    <header className="space-y-4">
+      {/* Container utama dengan Flexbox untuk responsivitas */}
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        {/* Bagian Kiri: Judul dan Deskripsi */}
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-2 text-lg text-muted-foreground">
+              {description}
             </p>
-          </div>
-
-          {/* Bagian Kanan: Tombol Aksi (jika ada) */}
-          {actions && (
-            <div className="flex-shrink-0 ml-auto">
-              <div className="flex items-center space-x-3">
-                {actions}
-              </div>
-            </div>
           )}
         </div>
+
+        {/* Bagian Kanan: Tombol Aksi */}
+        {actions && (
+          <div className="flex flex-shrink-0 items-center space-x-3">
+            {actions}
+          </div>
+        )}
       </div>
       
-      {/* Konten Tambahan (jika ada) */}
+      {/* Konten Tambahan */}
       {children && (
-        <div className="mt-4">
+        <div className="pt-4">
           {children}
         </div>
       )}
@@ -60,4 +60,3 @@ const DashboardPageHeader: React.FC<DashboardPageHeaderProps> = ({
   );
 };
 
-export default DashboardPageHeader;

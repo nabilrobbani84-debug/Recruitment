@@ -1,7 +1,7 @@
 import React from 'react';
 import { School, Edit, Trash2 } from 'lucide-react';
 import { Education } from '@/lib/types'; // Asumsi tipe data ada
-import { Button } from '@/component/common/Button';
+import Button from '@/component/common/Button'; // Perbaikan di sini
 
 interface EducationCardProps {
   education: Education;

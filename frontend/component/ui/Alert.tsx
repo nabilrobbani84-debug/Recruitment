@@ -1,36 +1,36 @@
 import * as React from "react";
-import { tv, type VariantProps } from "tailwind-variants";
+import { cva, type VariantProps } from "class-variance-authority"; // Mengganti `tv` dengan `cva` yang lebih umum
 import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle, Info, XCircle } from "lucide-react";
 
-const alertVariants = tv({
-  base: "relative w-full rounded-lg border p-4 [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
-  variants: {
-    variant: {
-      default: "bg-background text-foreground",
-      destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-      success: "border-green-500/50 text-green-600 dark:border-green-500 [&>svg]:text-green-500",
-      info: "border-blue-500/50 text-blue-600 dark:border-blue-500 [&>svg]:text-blue-500",
-      warning: "border-yellow-500/50 text-yellow-600 dark:border-yellow-500 [&>svg]:text-yellow-500",
+const alertVariants = cva(
+  // PENINGKATAN A: Menggunakan Flexbox untuk alignment yang lebih baik
+  "relative flex w-full items-start gap-4 rounded-xl border p-4 shadow-sm", 
+  {
+    variants: {
+      variant: {
+        default: "bg-background text-foreground",
+        destructive: "border-destructive/30 bg-destructive/5 text-destructive [&>svg]:text-destructive",
+        success: "border-emerald-500/30 bg-emerald-500/5 text-emerald-600 [&>svg]:text-emerald-500",
+        // PENINGKATAN B: Style yang lebih modern dan subtle
+      },
     },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
 const alertIcons = {
   default: Info,
   destructive: XCircle,
   success: CheckCircle,
-  info: Info,
-  warning: AlertTriangle,
 };
 
 const Alert = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, children, ...props }, ref) => {
   const Icon = alertIcons[variant || "default"];
   return (
     <div
@@ -39,9 +39,9 @@ const Alert = React.forwardRef<
       className={cn(alertVariants({ variant }), className)}
       {...props}
     >
-      <Icon className="h-5 w-5" />
-      {/* The children, like AlertTitle and AlertDescription, will be rendered here */}
-      <div className="ml-2">{props.children}</div>
+      {/* PENINGKATAN C: Penataan ikon dan konten yang lebih bersih */}
+      <Icon className="h-5 w-5 flex-shrink-0" />
+      <div className="flex-grow">{children}</div>
     </div>
   );
 });
@@ -53,7 +53,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-bold leading-none tracking-tight", className)}
+    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
     {...props}
   />
 ));
@@ -65,7 +65,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
+    className={cn("text-sm text-foreground/80", className)}
     {...props}
   />
 ));
